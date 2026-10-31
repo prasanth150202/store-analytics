@@ -103,7 +103,7 @@ function cancel_by(): void
         $r['share_of_cancelled'] = $totC ? 100 * $r['cancelled'] / $totC : 0;
         $out[] = $r;
     }
-    usort($out, fn($a, $b) => $b['cancelled'] <=> $a['cancelled']);
+    usort($out, fn($a, $b) => ($b['cancelled'] <=> $a['cancelled']) ?: strcmp((string)$a['k'], (string)$b['k']));
     out(['dim' => $dim, 'unit' => $unit, 'overall_rate' => $overall, 'total_volume' => $totV, 'total_cancelled' => $totC, 'rows' => $out,
          'hidden' => count($rows) - count($out), 'min' => $min]);
 }

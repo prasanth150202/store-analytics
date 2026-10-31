@@ -39,7 +39,8 @@ function variants_designs(): void
                FROM fact_order_item i JOIN fact_order o ON o.order_key=i.order_key
                JOIN dim_product p ON p.brand=i.brand AND p.product_key=i.product_key
                WHERE $W GROUP BY i.product_key, p.title, p.product_type, p.feeding, p.zip_style, p.neck, p.sleeve, p.pattern, p.fabric,
-                                 p.range_tag, p.length_style, p.colour_family, p.colour_name",
+                                 p.range_tag, p.length_style, p.colour_family, p.colour_name
+               ORDER BY i.product_key",
         array_merge([$curStart, $sc->end, $prevStart, $prevEnd], $sc->p()));
     $sizes = q("SELECT i.product_key AS k, i.size, SUM(CASE WHEN i.is_cancelled=0 THEN i.quantity ELSE 0 END) AS units
                 FROM fact_order_item i JOIN fact_order o ON o.order_key=i.order_key WHERE $W GROUP BY i.product_key, i.size", $sc->p());

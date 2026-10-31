@@ -23,13 +23,15 @@ function cust_rows(Scope $sc): array
                MIN(CASE WHEN o.is_cancelled=0 THEN o.ordered_date_ist END) AS first_kept
         FROM fact_order o WHERE o.brand=%s AND o.ordered_date_ist BETWEEN %s AND %s GROUP BY o.customer_key),
       buyers AS (SELECT b.*, DATEDIFF(%s, b.last_kept) AS recency FROM base b WHERE b.net_orders >= 1),
-      scored AS (SELECT b.*, LEAST(5, 1 + FLOOR(5 * PERCENT_RANK() OVER (ORDER BY b.recency DESC))) AS r,
-                        PERCENT_RANK() OVER (ORDER BY b.net_rev) AS vr FROM buyers b)
+      ranked AS (SELECT b.*, RANK() OVER (ORDER BY b.recency DESC) - 1 AS rk_r, RANK() OVER (ORDER BY b.net_rev) - 1 AS rk_v,
+                        COUNT(*) OVER () - 1 AS n1 FROM buyers b),
+      scored AS (SELECT x.*, LEAST(5, 1 + (5 * x.rk_r) DIV GREATEST(x.n1, 1)) AS r,
+                        x.n1 > 0 AND 10 * x.rk_v >= 9 * x.n1 AS top10, x.n1 > 0 AND 2 * x.rk_v >= x.n1 AS top50 FROM ranked x)
       SELECT s.*, CASE WHEN s.net_orders >= 3 AND s.r >= 4 THEN 'Champions'
                        WHEN s.net_orders >= 2 AND s.r >= 3 THEN 'Loyal'
                        WHEN s.net_orders >= 2 THEN 'At risk'
                        WHEN s.r = 5 THEN 'New' WHEN s.r = 4 THEN 'Promising' WHEN s.r = 3 THEN 'Needs attention' ELSE 'Hibernating' END AS segment,
-             CASE WHEN s.vr >= 0.9 THEN 'High value' WHEN s.vr >= 0.5 THEN 'Mid value' ELSE 'Low value' END AS tier,
+             CASE WHEN s.top10 THEN 'High value' WHEN s.top50 THEN 'Mid value' ELSE 'Low value' END AS tier,
              d.customer_name, d.primary_phone, d.primary_email, d.city, d.province, d.total_orders AS lifetime_orders, d.merge_confidence
       FROM scored s JOIN dim_customer d ON d.customer_key = s.customer_key", array_merge($sc->p(), [$sc->end]));
 }
@@ -89,7 +91,7 @@ function cust_segments(): void
         'cod_only_repeat' => count(array_filter($rows, fn($r) => $r['net_orders'] >= 2 && $r['cod_orders'] == $r['orders'])),
         'cancelled_only' => $cancelledOnly,
     ];
-    usort($rows, fn($a, $b) => $b['net_rev'] <=> $a['net_rev']);
+    usort($rows, fn($a, $b) => ($b['net_rev'] <=> $a['net_rev']) ?: strcmp($a['customer_key'], $b['customer_key']));
     $keep = ['customer_key', 'customer_name', 'city', 'net_orders', 'net_rev', 'segment', 'recency'];
     $top = array_map(fn($r) => array_intersect_key($r, array_flip($keep)), array_slice($rows, 0, 12));
     $tierList = [];
@@ -112,7 +114,7 @@ function cust_list_rows(Scope $sc, ?string $segment, ?string $search, int $limit
         $rows = array_values(array_filter($rows, fn($r) => str_contains(mb_strtolower((string)$r['customer_name']), $s) || str_contains((string)$r['primary_phone'], $s)
             || str_contains(mb_strtolower((string)$r['city']), $s) || str_contains(mb_strtolower($r['customer_key']), $s)));
     }
-    usort($rows, fn($a, $b) => $b['net_rev'] <=> $a['net_rev']);
+    usort($rows, fn($a, $b) => ($b['net_rev'] <=> $a['net_rev']) ?: strcmp($a['customer_key'], $b['customer_key']));
     $keep = ['customer_key', 'customer_name', 'primary_phone', 'primary_email', 'city', 'province', 'net_orders', 'cancelled', 'net_rev', 'recency', 'last_kept', 'segment', 'tier', 'merge_confidence'];
     return ['total' => count($rows), 'rows' => array_map(fn($r) => array_intersect_key($r, array_flip($keep)), array_slice($rows, 0, $limit))];
 }

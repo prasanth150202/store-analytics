@@ -70,7 +70,7 @@ function products_by(): void
     [$expr, $order, $label] = dim_of($dim);
     [$W, $FROM, $AGG] = [W, ITEM_FROM, AGG];
     $ordSel = $order ? ", $order AS ord" : '';
-    $orderBy = $order ? 'ord' : 'units_net DESC';
+    $orderBy = $order ? 'ord, 1' : 'units_net DESC, units DESC, 1';
     $rows = q("SELECT $expr AS k, $AGG, COUNT(DISTINCT i.product_key) AS products
                $ordSel
                $FROM WHERE $W GROUP BY 1 ORDER BY $orderBy", $sc->p());
@@ -127,14 +127,14 @@ function ct_order(array $rows, string $axis, string $ordKey): array
             $seen[$id] = [$r[$axis], isset($seen[$id]) ? min($seen[$id][1], $r[$ordKey]) : min(1e18, $r[$ordKey])];
         }
         $items = array_values($seen);
-        usort($items, fn($a, $b) => $a[1] <=> $b[1]);
+        usort($items, fn($a, $b) => ($a[1] <=> $b[1]) ?: strcmp((string)$a[0], (string)$b[0]));
     } else {
         foreach ($rows as $r) {
             $id = key_id($r[$axis]);
             $seen[$id] = [$r[$axis], ($seen[$id][1] ?? 0) + ($r['units'] ?? 0)];
         }
         $items = array_values($seen);
-        usort($items, fn($a, $b) => $b[1] <=> $a[1]);
+        usort($items, fn($a, $b) => ($b[1] <=> $a[1]) ?: strcmp((string)$a[0], (string)$b[0]));
     }
     return array_column($items, 0);
 }

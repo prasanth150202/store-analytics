@@ -70,5 +70,8 @@ dashboard is the safer set-up.
 ## What was checked
 
 `scripts/parity_check.py` calls the Python and PHP versions with the same requests (every endpoint, both brands, six date
-ranges, every analysis dimension, customer CSV, error cases) and compares the JSON value by value: 452 of 452 identical, also
-when the PHP site reads a freshly imported single-database copy.
+ranges, every analysis dimension, customer CSV, error cases) and compares the JSON value by value: 452 of 452 identical against
+the local MySQL 8.4 copy, and 452 of 452 (ignoring the row order of unsorted lists) when the PHP site reads the imported copy on
+the Hostinger MariaDB 11.8 server. Rankings and top-N lists are fully ordered in SQL or code, so they come out the same on both
+engines; MySQL and MariaDB differ only in the row order of lists the page places by name or coordinate (heatmap cells, matrix
+cells, order stages) and in which capitalisation of an otherwise identical product title they show.
