@@ -90,6 +90,7 @@ export default {
       const gs = fin(groupBy(rows, [k])), sorted = gs.filter(g => !isNs(g.keys[0])).sort((a, b) => b.velAvg - a.velAvg).concat(gs.filter(g => isNs(g.keys[0])));
       return { k, l, gs: sorted };
     });
+    cards.sort((a, b) => b.gs.length - a.gs.length);   // longest lists first, so the two cards on a row are about the same height
     const vmax = Math.max(...cards.flatMap(c => c.gs.filter(g => g.n >= 3).map(g => g.velAvg)), T.velAvg, 1);
     for (const c of cards) {
       const ns = c.gs.find(g => isNs(g.keys[0])), nsShare = ns ? 100 * ns.n / T.n : 0;
@@ -124,9 +125,9 @@ export default {
       comboBox.replaceChildren(
         h('p', { class: 'muted', style: { margin: '0 0 8px', fontSize: '12.5px' }, text: `${fmt.int(gs.length)} combinations of ${ui.combo.map(label).join(' + ')} are carried by at least ${ui.min} designs. Bars show sales per design per month; the tick is the average design.` }),
         gs.length ? h('div', { class: 'grid', style: { gap: '20px' } },
-          h('div', { class: 'c-6' }, barList(top, { cls: 'wide', name: g => g.label, value: g => g.velAvg, valueFmt: v => fmt.dec(v, 1), marker: T.velAvg, extraLabel: 'Vs avg', extra: g => `${g.ratio.toFixed(2)}×${arrow(g)}`,
+          h('div', { class: 'c-12' }, barList(top, { cls: 'wide', name: g => g.label, value: g => g.velAvg, valueFmt: v => fmt.dec(v, 1), marker: T.velAvg, extraLabel: 'Vs avg', extra: g => `${g.ratio.toFixed(2)}×${arrow(g)}`,
             nameNode: g => h('span', null, g.label, h('small', { text: `${fmt.int(g.n)}` })), tip: g => [{ label: 'Designs', value: fmt.int(g.n) }, { label: 'Units kept', value: fmt.int(g.kept) }, { label: 'Per design per month', value: fmt.dec(g.velAvg, 1) }, { label: 'Cancel rate', value: fmt.pct(g.cancel, 1) }] })),
-          h('div', { class: 'c-6' }, table({ filename: 'combinations.csv', sortKey: 'ratio', rows: gs, limit: 40, search: 'Search combinations', columns: [
+          h('div', { class: 'c-12' }, table({ filename: 'combinations.csv', sortKey: 'ratio', rows: gs, limit: 40, search: 'Search combinations', columns: [
             { key: 'label', label: 'Combination', name: true, searchable: true }, { key: 'n', label: 'Designs', align: 'r', fmt: fmt.int }, { key: 'kept', label: 'Units kept', align: 'r', fmt: fmt.int },
             { key: 'velAvg', label: 'Per design / mo', align: 'r', fmt: v => fmt.dec(v, 1) }, { key: 'ratio', label: 'Vs avg', align: 'r', fmt: v => `${v.toFixed(2)}×` },
             { key: 'adj', label: 'Adj.', align: 'r', fmt: v => `${v.toFixed(2)}×` }, { key: 'verdict', label: 'Verdict', render: g => verdictNode(g), sortVal: g => g.ratio }, { key: 'cancel', label: 'Cancelled', align: 'r', fmt: v => fmt.pct(v, 0) }, { key: 'price', label: 'Avg price', align: 'r', fmt: fmt.inr }] })))

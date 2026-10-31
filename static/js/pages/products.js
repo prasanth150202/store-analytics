@@ -36,7 +36,7 @@ export default {
     const grid = h('div', { class: 'grid' }); page.append(grid);
 
     // ── size curve as a tape measure ──
-    const rulerBox = h('div');
+    const rulerBox = h('div', { class: 'ruler-box' });
     const typeOptions = [['all', 'All garments'], ...cross.ys.map(y => [y, y])];
     function paintRuler() {
       const rows = cross.xs.map(sz => {

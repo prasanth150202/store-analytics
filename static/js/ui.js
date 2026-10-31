@@ -150,6 +150,7 @@ export function table({ columns, rows, sortKey, sortDir = -1, limit, search, fil
     const sc = columns.find(c => c.key === state.key);
     if (sc) list.sort((a, b) => { const x = val(sc, a), y = val(sc, b); return (x > y ? 1 : x < y ? -1 : 0) * state.dir; });
     const shown = limit ? list.slice(0, limit) : list;
+    body.classList.toggle('grow', shown.length <= 16);   // short tables show every row; only long ones scroll
     const maxes = {}; columns.filter(c => c.bar).forEach(c => maxes[c.key] = Math.max(...rows.map(r => Math.abs(val(c, r) || 0)), 1));
     body.replaceChildren(shown.length ? h('table', { class: 'tbl' },
       h('thead', null, h('tr', null, columns.map(c => h('th', {
@@ -163,7 +164,7 @@ export function table({ columns, rows, sortKey, sortDir = -1, limit, search, fil
           c.bar && h('i', { style: { width: `${Math.max(2, 100 * Math.abs(val(c, r) || 0) / maxes[c.key] * 0.88)}%` } }),
           c.bar ? h('span', null, content) : content);
       })))),
-    ) : h('p', { class: 'muted', style: { padding: '14px 10px' } }, empty));
+    ) : h('p', { class: 'muted', style: { padding: '14px 12px' } }, empty));
   }
   paint();
   wrap.append(searchBox || '', body);

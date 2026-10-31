@@ -75,8 +75,8 @@ export function bars(el, { cats, series, horizontal = false, stacked = false, va
   const ax = axes(t, { xData: horizontal ? cats.map(v => cut(v)) : cats, xFmt: catFmt, yFmt: yFmt || valFmt, horizontal });
   if (horizontal && labels) { ax.xAxis.axisLabel.show = false; ax.xAxis.splitLine.show = false; }
   if (!horizontal && cats.length <= 14) {          // few categories: show every label, wrapped to the column width
-    const w = Math.max(44, Math.floor((el.clientWidth - 56) / cats.length) - 4);
-    ax.xAxis.axisLabel = { ...ax.xAxis.axisLabel, interval: 0, hideOverlap: false, width: w, overflow: 'break' };
+    const w = Math.max(52, Math.floor((el.clientWidth - 56) / cats.length) - 4);
+    ax.xAxis.axisLabel = { ...ax.xAxis.axisLabel, interval: 0, hideOverlap: false, width: w, overflow: 'break', ...(w < 64 ? { fontSize: 11 } : {}) };   // narrow slots: smaller text so a value like ₹600–999 is not cut in two
   }
   c.setOption({
     textStyle: { fontFamily: t.font },

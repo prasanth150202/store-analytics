@@ -43,14 +43,14 @@ export default {
 
     const names = { pre_onboarding_history: 'Before the data starts (history)', cutover_window: 'Between the two databases (7–13 Jul 2026)', scattered_live: 'Scattered gaps in live data' };
     grid.append(card({ title: 'Missing orders', span: 'c-6', cls: 'pad0', cap: 'Order numbers that never reached the data. A Shopify order export would close them. The full list is in the dq_missing_order_number table.',
-      chart: d.missing.length ? table({ rows: d.missing.map(m => ({ ...m, label: names[m.k] || m.k, range: `#${m.lo}–#${m.hi}` })), sortKey: 'n', columns: [{ key: 'label', label: 'Where', name: true }, { key: 'range', label: 'Order numbers' }, { key: 'n', label: 'Missing', align: 'r', fmt: fmt.int, bar: true }] }) : h('p', { class: 'muted', style: { padding: '8px 20px' }, text: 'No gaps in the order sequence.' }) }));
+      chart: d.missing.length ? table({ rows: d.missing.map(m => ({ ...m, label: names[m.k] || m.k, range: `#${m.lo}–#${m.hi}` })), sortKey: 'n', columns: [{ key: 'label', label: 'Where', name: true }, { key: 'range', label: 'Order numbers' }, { key: 'n', label: 'Missing', align: 'r', fmt: fmt.int, bar: true }] }) : h('p', { class: 'muted', style: { padding: '8px 24px' }, text: 'No gaps in the order sequence.' }) }));
     grid.append(card({ title: 'Cleaning log', span: 'c-6', cls: 'pad0', cap: 'What was excluded, flagged or merged when the data was cleaned.',
       chart: table({ rows: d.issues, sortKey: 'n', columns: [{ key: 'k', label: 'Issue', name: true, render: r => ISSUE[r.k] || r.k }, { key: 'severity', label: 'Kind' }, { key: 'n', label: 'Rows', align: 'r', fmt: fmt.int, bar: true }] }) }));
 
     grid.append(card({ title: 'Meta exports loaded', span: 'c-12', cls: 'pad0', cap: 'Each file you send is recorded here with its totals so you can compare them with Ads Manager.',
       chart: d.loads.length ? table({ rows: d.loads, sortKey: 'loaded_at', columns: [{ key: 'file_name', label: 'File', name: true }, { key: 'kind', label: 'Type' }, { key: 'date_min', label: 'From' }, { key: 'date_max', label: 'To' },
         { key: 'rows_loaded', label: 'Rows', align: 'r', fmt: fmt.int }, { key: 'spend_total', label: 'Spend', align: 'r', fmt: fmt.inr }, { key: 'attribution_setting', label: 'Attribution' }, { key: 'loaded_at', label: 'Loaded' }] })
-        : h('div', { style: { padding: '8px 20px 14px' } }, notice('No Meta exports have been loaded for this brand. The steps and file names are in <code>data/meta/HOW_TO_EXPORT.md</code>.')) }));
+        : h('div', { style: { padding: '8px 24px 14px' } }, notice('No Meta exports have been loaded for this brand. The steps and file names are in <code>data/meta/HOW_TO_EXPORT.md</code>.')) }));
     return page;
   },
 };
