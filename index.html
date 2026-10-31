@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-brand="AHA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digifyce Analytics</title>
+  <meta name="description" content="Sales, variants, cancellations, campaigns and customers for AHA and TIRLS.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231967D2'/%3E%3Cpath d='M9 22V10l14 12V10' stroke='%23fff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<a class="skip" href="#page">Skip to content</a>
+<div class="shell" id="shell">
+  <aside class="rail" id="rail" aria-label="Main navigation">
+    <div class="rail-top">
+      <div class="wordmark"><span class="wm-mark" aria-hidden="true"></span><span class="wm-text">Digifyce&nbsp;Analytics</span></div>
+      <button class="rail-collapse" id="railCollapse" type="button" aria-label="Collapse navigation" title="Collapse navigation">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12 5l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="tags" id="tags" role="radiogroup" aria-label="Brand"></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="rail-foot">
+      <div class="asof" id="asof"></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch colour theme">
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16 11.5A6.5 6.5 0 0 1 8.5 4 6.5 6.5 0 1 0 16 11.5z" fill="currentColor"/></svg>
+        <span class="lbl">Theme</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar" id="topbar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation">
+        <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="filters" id="filters"></div>
+    </header>
+    <main class="page" id="page" tabindex="-1"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script src="/static/vendor/echarts.min.js"></script>
+<script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
