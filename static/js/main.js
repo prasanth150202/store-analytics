@@ -31,12 +31,23 @@ let ctx = null, seq = 0, afterQueue = [];
 const pageEl = document.getElementById('page');
 const modules = {};
 
+// ── sign-in (only when the server has it: the PHP site on the web host) ──
+function backToSignIn() {
+  try {
+    if (Date.now() - Number(sessionStorage.getItem('cr.signin') || 0) < 10000) return false;
+    sessionStorage.setItem('cr.signin', String(Date.now()));
+  } catch { /* storage blocked: reload anyway */ }
+  location.reload();
+  return true;
+}
+
 // ── API ──
 export async function api(path, extra = {}) {
   const r = range();
   const p = new URLSearchParams({ brand: state.brand, start: r.start, end: r.end, ...extra });
   const res = await fetch(`/api${path}?${p}`);
   const body = await res.json().catch(() => ({}));
+  if (res.status === 401 && body.login && backToSignIn()) throw new Error('Signed out');
   if (!res.ok) throw new Error(body.error || body.detail || `Request failed (${res.status})`);
   return body;
 }
@@ -194,6 +205,14 @@ export async function render() {
   window.addEventListener('hashchange', () => { fromHash(); renderNav(); render(); });
 
   try { ctx = await (await fetch('/api/context')).json(); } catch (e) { ctx = null; }
+  if (ctx && ctx.login && backToSignIn()) return;
+  fetch('/api/auth/status').then(r => (r.ok ? r.json() : null)).then(a => {
+    if (!a || !a.enabled || !a.signed_in) return;
+    document.getElementById('whoName').textContent = a.user || '';
+    document.getElementById('signOut').title = `Signed in as ${a.user || ''}`;
+    document.getElementById('who').hidden = false;
+    document.getElementById('signOut').onclick = () => fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).finally(() => location.reload());
+  }).catch(() => {});
   if (!ctx || !ctx.brands || !ctx.brands.AHA) {
     pageEl.replaceChildren(empty('The data service is not reachable', 'Check that the database container is running, then reload this page.'));
     return;

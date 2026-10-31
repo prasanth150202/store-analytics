@@ -16,5 +16,8 @@ return [
     // 'APP_DEBUG' => '1',   // show error text in API responses while setting up; remove afterwards
     // 'CACHE_TTL' => '3600',  // seconds a computed answer is kept in the cache/ folder (0 = off). Hosts that cap new database
     //                         // connections per hour need this; after importing new data, delete cache/ or wait this long.
+    // 'AUTH_USER' => 'admin@digifyce.com',   // the one sign-in email (this is the default)
+    // 'AUTH_DISABLED' => '1',   // no sign-in: only for working on your own computer, never on the web host
+    // 'SETUP_CODE_SHA256' => '...',   // replaces the built-in one-time setup code (sha256 of the new code without dashes, upper case)
     // 'DB_PERSIST' => '1',    // reuse database connections between requests (0 = open a new one each time)
 ];

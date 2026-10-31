@@ -5,6 +5,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../lib/bootstrap.php';
+require __DIR__ . '/../lib/auth.php';
 foreach (['core', 'products', 'cancel', 'marketing', 'checkouts', 'customers', 'behaviour', 'variants', 'health'] as $module) {
     require __DIR__ . "/../lib/$module.php";
 }
@@ -36,15 +37,19 @@ const ROUTES = [
 ];
 
 try {
-    if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
-        header('Allow: GET, HEAD');
-        out(['detail' => 'Method Not Allowed'], 405);
-    }
     $path = (string)parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
     $route = trim((string)preg_replace('#^.*?/api/#', '', $path . (str_ends_with($path, '/api') ? '/' : '')), '/');
     if ($route === 'health' || str_ends_with($path, '/health')) {
         out(['ok' => true]);
     }
+    if (str_starts_with($route, 'auth/')) {
+        auth_route($route);
+    }
+    if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true)) {
+        header('Allow: GET, HEAD');
+        out(['detail' => 'Method Not Allowed'], 405);
+    }
+    auth_require();   // everything below is data: sign-in first, before the cache or the database is touched
     if (!isset(ROUTES[$route])) {
         out(['detail' => 'Not Found'], 404);
     }
@@ -68,7 +73,7 @@ try {
         }
         // setup problems: say what to check (never the host, user or password)
         if (cfg('DB_USER', '') === '') {
-            out(['error' => 'No database login is set. Put config.local.php next to index.html (see README, step 5).'], 500);
+            out(['error' => 'No database login is set. Put config.local.php next to index.php (see README, step 5).'], 500);
         }
         if (in_array($code, [1044, 1045, 1049, 2002, 2003, 2006, 2054], true)) {
             $why = [1044 => 'this user may not use that database', 1045 => 'user or password refused', 1049 => 'no database with that name',

@@ -6,10 +6,11 @@ Python version (same screens, same numbers); only the server code is PHP. Tested
 **This folder is the whole deployable site. It is safe to put in Git: it contains no data and no passwords.**
 
 ```
-index.html            the dashboard (single page)
+index.php             the home page: sign-in screen, or the dashboard once signed in
 static/               CSS, JavaScript, fonts, charts (copied from dashboard/app/static, see "Updating the screens")
-api/index.php         receives every /api/* request
-lib/                  the server code (the web server refuses direct requests to it)
+api/index.php         receives every /api/* request (all of them need sign-in)
+lib/                  the server code and the dashboard page lib/app.html (the web server refuses direct requests to it)
+private/              created on first use: the password hash (refused by the web server, ignored by Git)
 .htaccess             routes /api/* to api/index.php, blocks config files, sets cache and robots headers
 config.example.php    copy to config.local.php and fill in (config.local.php is ignored by Git)
 ```
@@ -35,14 +36,27 @@ docker compose up -d php          # http://127.0.0.1:8091, reads the local MySQL
    That file holds customer names and phone numbers: never commit it or place it in the web folder.
 4. **Deploy the code.** In hPanel connect this repository under Git (Advanced > Git), set the deploy path to the subdomain's
    document root and deploy. (Or upload the contents of this folder with the File Manager / FTP.)
-5. **Credentials.** In the document root create `config.local.php` from `config.example.php` with the database name, user and
+5. **Credentials.** In the document root (next to `index.php`) create `config.local.php` from `config.example.php` with the database name, user and
    password. Set `DASH_SCHEMA` to the same database name. Do not commit this file.
 6. **Check.** Open `https://analytics.yourdomain.com/health` (shows `{"ok":true}`), then `/api/context` (shows both brands with
    their date ranges), then the home page. If an API call shows "Something went wrong", add `'APP_DEBUG' => '1'` to
    `config.local.php`, reload to read the error text, then remove that line.
    If the page says the database is at its connection limit, see "Connection limits" below.
-7. **Protect it.** The Segments page lists customer names and phone numbers. Before sharing the link, add a password in hPanel
-   (Websites > Password protect directories) or tell me and I will add a login.
+7. **Set the password.** Open the site. It starts locked and shows "Set your password" for `admin@digifyce.com`: enter the one-time
+   setup code (given to the owner, never stored in Git), then choose a password of 10 to 72 characters. That signs you in. Do this
+   straight after the first deploy, because the setup code is the only thing that stops someone else from choosing the password.
+
+## Sign-in
+
+- One account, `admin@digifyce.com` (change with `AUTH_USER`). The home page, every data request and the customer CSV need it.
+- Signing in lasts 14 days on that browser; **Sign out** is at the top right.
+- The password is stored only as a hash in `private/auth.php`. Five wrong passwords from one address (25 in total) lock sign-in
+  for 15 minutes.
+- **Forgot the password, or want to change it:** delete `private/auth.php` in File Manager, reload the site and set a new one with
+  the setup code. This also signs out every browser.
+- Never publish the setup code. To issue a new one, put the SHA-256 of the new code (upper case, no dashes) in `config.local.php`
+  as `SETUP_CODE_SHA256`.
+- On your own computer the Docker `php` service runs with `AUTH_DISABLED=1`, so no sign-in there.
 
 ## Connection limits
 

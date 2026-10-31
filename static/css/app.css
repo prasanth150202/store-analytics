@@ -126,6 +126,13 @@ a { color: inherit; }
 .asof b { color: var(--rail-ink); font-weight: 500; display: block; }
 .theme-btn { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--line-strong); color: var(--rail-ink); padding: 6px 12px; border-radius: 18px; font-size: 12.5px; font-weight: 500; }
 .theme-btn:hover { background: var(--rail-2); }
+.who { flex: none; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--ink-2); }
+.who[hidden] { display: none; }
+.who span { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.who button { background: transparent; border: 1px solid var(--line-strong); color: var(--ink); padding: 6px 14px; border-radius: 18px; font: inherit; font-weight: 500; cursor: pointer; }
+.who button:hover { background: var(--ghost); }
+.who button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 1240px) { .who span { display: none; } }
 .collapsed .wm-text, .collapsed .nav-group, .collapsed .nav-item span, .collapsed .asof, .collapsed .theme-btn .lbl, .collapsed .tag .tg-txt { display: none; }
 .collapsed .rail-top { flex-direction: column; gap: 8px; padding: 4px 0; align-items: center; }
 .collapsed .tags { padding-inline: 8px; }
