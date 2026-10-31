@@ -60,9 +60,21 @@ try {
     out(['detail' => $e->detail], $e->status);
 } catch (Throwable $e) {
     error_log('dashboard api: ' . get_class($e) . ': ' . $e->getMessage());
-    // 1226 = hourly connection limit of the database user, 1203 = its simultaneous limit, 1040 = server full
-    if ($e instanceof PDOException && in_array((int)($e->errorInfo[1] ?? 0), [1226, 1203, 1040], true)) {
-        out(['error' => 'The database is at its connection limit right now. Wait a few minutes and reload.'], 503);
+    if ($e instanceof PDOException) {
+        $code = (int)($e->errorInfo[1] ?? $e->getCode());
+        // 1226 = hourly connection limit of the database user, 1203 = its simultaneous limit, 1040 = server full
+        if (in_array($code, [1226, 1203, 1040], true)) {
+            out(['error' => 'The database is at its connection limit right now. Wait a few minutes and reload.'], 503);
+        }
+        // setup problems: say what to check (never the host, user or password)
+        if (cfg('DB_USER', '') === '') {
+            out(['error' => 'No database login is set. Put config.local.php next to index.html (see README, step 5).'], 500);
+        }
+        if (in_array($code, [1044, 1045, 1049, 2002, 2003, 2006, 2054], true)) {
+            $why = [1044 => 'this user may not use that database', 1045 => 'user or password refused', 1049 => 'no database with that name',
+                    2002 => 'the host could not be reached', 2003 => 'the host could not be reached', 2006 => 'the server dropped the connection', 2054 => 'login method not supported'][$code];
+            out(['error' => "Cannot connect to the database (error $code: $why). Check DB_HOST, DB_NAME, DB_USER and DB_PASSWORD in config.local.php."], 500);
+        }
     }
     out(['error' => cfg('APP_DEBUG') === '1' ? get_class($e) . ': ' . $e->getMessage() : 'Something went wrong. Please try again.'], 500);
 }
